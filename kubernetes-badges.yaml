@@ -1,0 +1,41 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    name: kubernetes-badges
+  name: kubernetes-badges
+  namespace: kubernetes-badges
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: kubernetes-badges
+  template:
+    metadata:
+      labels:
+        name: kubernetes-badges
+    spec:
+      containers:
+      - image: docker.io/silasbw/kubernetes-badges:latest
+        imagePullPolicy: Always
+        name: kubernetes-badges
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    name: kubernetes-badges
+  name: kubernetes-badges
+  namespace: kubernetes-badges
+spec:
+  ports:
+  - name: http
+    port: 8080
+    protocol: TCP
+  selector:
+    name: kubernetes-badges
