@@ -1,3 +1,38 @@
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  # "namespace" omitted since ClusterRoles are not namespaced
+  name: kubernetes-badges:deployments-reader
+rules:
+- apiGroups: ["extensions", "apps"]
+  resources: ["deployments"]
+  verbs: ["get"]
+
+---
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: kubernetes-badges
+  namespace: kubernetes-badges
+
+---
+
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: kubernetes-badges:deployments-reader
+subjects:
+- kind: ServiceAccount
+  name: kubernetes-badges
+  namespace: kubernetes-badges
+roleRef:
+  kind: ClusterRole
+  name: kubernetes-badges:deployments-reader
+  apiGroup: rbac.authorization.k8s.io
+
+---
+
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
@@ -15,6 +50,7 @@ spec:
       labels:
         name: kubernetes-badges
     spec:
+      serviceAccountName: kubernetes-badges
       containers:
       - image: docker.io/silasbw/kubernetes-badges:latest
         imagePullPolicy: Always

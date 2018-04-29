@@ -8,23 +8,39 @@ const terminus = require('@godaddy/terminus')
 const app = express()
 let client
 
+function getImageTag (image) {
+  const name = image.split('/').slice(-1)[0]
+  const splits = name.split(':')
+  if (splits.length < 2) return 'latest'
+  return splits[1]
+}
+
 const wrap = fn => (req, res, next) => fn(req, res).catch(next)
 app.get('/ns/:namespace/deploy/:deployment', wrap(async (req, res) => {
   let apiRes
   if (client.apis.apps.v1) {
-    apiRes = await client.apis.apps.v1.namespaces(req.params.namespace).deployments(req.params.deployment).get()
+    apiRes = await client.apis
+      .apps
+      .v1
+      .namespaces(req.params.namespace)
+      .deployments(req.params.deployment)
+      .get()
   } else {
-    apiRes = await client.apis.extensions.v1beta1.namespaces(req.params.namespace).deployments(req.params.deployment).get()
+    apiRes = await client.apis
+      .extensions
+      .v1beta1
+      .namespaces(req.params.namespace)
+      .deployments(req.params.deployment)
+      .get()
   }
 
   //
   // Describe the Deployment by concatenating the container image paths.
   //
   const containers = apiRes.body.spec.template.spec.containers
-  const imageNames = containers.map(container => container.image.split('/', 1).slice(-1)[0]);
-  
+  const imageTags = containers.map(container => getImageTag(container.image))
   const subject = encodeURIComponent(req.query.subject || 'deploy')
-  const status = imageNames.join(' ')
+  const status = ` ${imageTags.join(' ')} `
   const format = {
     text: [ subject, status ],
     format: 'svg',
