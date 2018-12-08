@@ -1,5 +1,7 @@
 # kubernetes-badges
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/silasbw/kubernetes-badges.svg)](https://greenkeeper.io/)
+
 Track the status of Kubernetes Deployments using badges.
 
 ## Deploying
